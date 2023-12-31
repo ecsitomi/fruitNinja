@@ -6,6 +6,7 @@ import random
 WIDTH=1280
 HEIGHT=620
 BG_COLOR=(255,255,255)
+FONT_COLOR=(27,131,142)
 FPS=60
 
 class Ninja(pygame.sprite.Sprite): #ninja osztály
@@ -121,10 +122,17 @@ class Fruit(pygame.sprite.Sprite):
         self.fruit_movement(self.fruit_speed) #gyümölcs sebességével esik
         self.destroy()
 
-def collision_sprite():
+def collision_sprite(): #ütközések vizsgálata
     if ninja.sprite.__getattribute__('attack_mode'): #getattribut előhozza a ninja attack módját vizsgálatra
-        pygame.sprite.spritecollide(ninja.sprite,fruit_group,True) #attack módban ütközés, True azért, hogy a fruit meghal
+        if pygame.sprite.spritecollide(ninja.sprite,fruit_group,True): #attack módban ütközés, True azért, hogy a fruit meghal
+            return True #bool az egész def... értelmezd a chatgpt-n ha kell, gyakorlatilag igen-igeny>igen, igen-nem>nem
+        else:
+            return False
 
+def display_score(): #pontok megjelenítése
+    score_surf=game_font.render('Score: '+str(score),True,FONT_COLOR) #hogyan
+    score_rect=score_surf.get_rect(topleft=(10,WIDTH-10)) #hol
+    screen.blit(score_surf,score_rect) #tadáám
 
 pygame.init() #inicializálja magát a pygame
 screen=pygame.display.set_mode((WIDTH,HEIGHT)) #meghatározza az ablakot
@@ -138,6 +146,9 @@ fruit_group=pygame.sprite.Group() #lehet sima group mert több objektumot tárol
 fruit_timer=pygame.USEREVENT+1 #gyümölcsökhöz időzítő
 fruit_sec=1000 #időzítőhöz idő - 1 ms
 pygame.time.set_timer(fruit_timer,fruit_sec) #maga az időzítő elindul
+
+score=0 #számolja a pontjainkat
+game_font=pygame.font.SysFont('arial',30,bold=True) #betűtípus
 
 running=True #futás
 while running:
@@ -156,7 +167,9 @@ while running:
     fruit_group.draw(screen) #gyümölcsök megjelenítése
     fruit_group.update() #frissítése
 
-    collision_sprite() #ütközés
+    if collision_sprite(): #ütközés
+        score+=1
+    display_score()
 
     pygame.display.update() #frissítés
     clock.tick(FPS) #másodpercenként mennyi kép
