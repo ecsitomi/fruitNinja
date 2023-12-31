@@ -23,22 +23,35 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
         NINJA_BW_3=pygame.image.load('img/Run__005_b.png').convert_alpha()
         self.ninja_bw=[NINJA_BW_1,NINJA_BW_2,NINJA_BW_3]
 
-        self.ninja_index=0 #melyik kép a listából
-        self.ninja_forward=True #melyik irányba megy
-        self.image=self.ninja_fw[self.ninja_index] #maga az adott kép
+        #támadások animálása
+        NINJA_ATTACK_1=pygame.image.load('img/Jump_Attack__002.png').convert_alpha()
+        NINJA_ATTACK_2=pygame.image.load('img/Jump_Attack__009.png').convert_alpha()
+        NINJA_ATTACK_3=pygame.image.load('img/Jump_Attack__007.png').convert_alpha()
+        self.ninja_attack=[NINJA_ATTACK_1,NINJA_ATTACK_2,NINJA_ATTACK_3]
 
-        self.image_original=pygame.image.load('img/Idle__000 1.png').convert_alpha() #jobbra néz
-        self.image_flipped=pygame.transform.flip(self.image_original,True,False) #horizontálisan tükrözött kép
+        self.ninja_index=0 #melyik kép a listából
+
+        self.image_original=pygame.image.load('img/Idle__000 1.png').convert_alpha() #jobbra néző állókép
+        self.image_flipped=pygame.transform.flip(self.image_original,True,False) #balra néző állókép
+        
+        self.image=self.ninja_fw[self.ninja_index] #maga az adott kép
         self.rect=self.image.get_rect(midbottom=(WIDTH/2,HEIGHT-100)) #képernyő aljára lett rakva
+
         self.speed=5 #mozgási sebesség
+        self.ninja_forward=True #melyik irányba megy
+        self.attack_mode=False #támad-e?
 
     def ninja_input(self):
         keys=pygame.key.get_pressed() #ninja mozgása
 
-        if keys[pygame.K_RIGHT]and self.rect.right<WIDTH:
+        if keys[pygame.K_SPACE]: #támadás
+            self.attack_mode=True
+            self.attack_animation()
+
+        if keys[pygame.K_RIGHT] and self.rect.right<WIDTH: #jobbra
             self.x_movement(self.speed)
             self.ninja_forward=True
-        if keys[pygame.K_LEFT] and self.rect.left>0:
+        if keys[pygame.K_LEFT] and self.rect.left>0: #ballra
             self.x_movement(-self.speed)
             self.ninja_forward=False
 
@@ -67,6 +80,13 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
             self.image=self.ninja_fw[int(self.ninja_index)] #azért int hogy egész szám legyen
         else:
             self.image=self.ninja_bw[int(self.ninja_index)] #ez a balra mozgás
+
+    def attack_animation(self): #támadás animálásának indexei
+        if self.ninja_index<len(self.ninja_fw)-1:
+            self.ninja_index+=0.1
+        else:
+            self.ninja_index=0
+        self.image=self.ninja_attack[int(self.ninja_index)]
 
     def y_movement(self,dy): #dy az a self.speed
         self.rect.y+=dy #vertikális mozgás
