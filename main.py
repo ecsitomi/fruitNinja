@@ -42,15 +42,24 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
         self.ninja_speed=5 #mozgási sebesség
         self.ninja_forward=True #melyik irányba megy
         self.attack_mode=False #támad-e?
+        
+        #UGRÁS ELEMEI
+        self.on_ground=True
+        self.gravity=1
+        self.jump_speed=-15
+        self.dy=0
 
     def ninja_input(self):
         keys=pygame.key.get_pressed() #ninja mozgása
 
-        if keys[pygame.K_SPACE]: #támadás
+        if keys[pygame.K_LCTRL]: #támadás
             self.attack_mode=True
             self.attack_animation()
         else:
             self.attack_mode=False #ha nincs space nincs attack mód
+
+        if keys[pygame.K_SPACE] and self.on_ground: #space ugrik ha a földön van
+            self.jump() #lásd lentebb ugrás fizika
 
         if keys[pygame.K_RIGHT] and self.rect.right<WIDTH: #jobbra
             self.x_movement(self.ninja_speed)
@@ -59,9 +68,9 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
             self.x_movement(-self.ninja_speed)
             self.ninja_forward=False
 
-        if keys[pygame.K_UP] and self.rect.bottom>HEIGHT-140: #fel
+        if keys[pygame.K_UP] and self.rect.bottom>HEIGHT-150: #fel
             self.y_movement(-self.ninja_speed)
-        if keys[pygame.K_DOWN] and HEIGHT-60>self.rect.bottom: #le
+        if keys[pygame.K_DOWN] and HEIGHT-95>self.rect.bottom: #le
             self.y_movement(self.ninja_speed)
 
         if not any(keys): #ha nincs lenyomott billentyű
@@ -69,6 +78,22 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
                 self.image=self.image_original
             else:
                 self.image=self.image_flipped
+
+    #UGRÁS
+    def apply_gravity(self): #ugrásban a süllyedés
+        if not self.on_ground:
+            self.dy+=self.gravity
+            self.rect.y+=self.dy  #gravitáció a négyzeten... majdnem (mindig ad hozzá)
+
+    def jump(self):
+        self.on_ground=False #nem vagyunk a földön
+        self.dy=self.jump_speed  #minusszal kezd, a hozzáadás miatt átmegy pluszba, mint egy görbe
+
+    def y_movement_collision(self): #ugrás utáni érkezés a platformra
+        if HEIGHT - 150 < self.rect.bottom < HEIGHT - 95:  # Ütközés vizsgálata a megfelelő magassági tartományban
+            self.rect.bottom = HEIGHT - 95  # A ninja alja az elfogadható tartomány alsó határánál helyezkedik el
+            self.dy = 0  # Zuhanás sebessége nulla
+            self.on_ground = True  # Földön vagyunk
 
     def x_movement(self,dx): #dx lesz a self.ninja_speed
         self.rect.x+=dx #horizontális mozgás
@@ -97,6 +122,8 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
 
     def update(self):
         self.ninja_input() #objektumon belül történik az elem frissítése
+        self.apply_gravity() #ugrás utáni zuhanás sebesség
+        self.y_movement_collision() #hova érjen vissza
 
 class Fruit(pygame.sprite.Sprite):
     def __init__(self, fruit_type): #fruit type határozza meg mi fog leesni
@@ -141,7 +168,7 @@ pygame.display.set_caption('Fruit Ninja') #főcím
 clock=pygame.time.Clock() #időzítő
 
 platform_surf=pygame.image.load('img/platform_xxl.png') #platform képe
-platform_rect=platform_surf.get_rect(midtop=(WIDTH/2,HEIGHT-150)) #platform helye
+platform_rect=platform_surf.get_rect(midtop=(WIDTH/2,HEIGHT-160)) #platform helye
 
 ninja=pygame.sprite.GroupSingle() #példányosítom a ninját
 ninja.add(Ninja())
