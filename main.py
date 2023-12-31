@@ -1,6 +1,5 @@
 import pygame
 import random
-#from pygame.sprite import _Group
 
 #állandó értékek
 WIDTH=1280
@@ -61,17 +60,19 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
         if keys[pygame.K_SPACE] and self.on_ground: #space ugrik ha a földön van
             self.jump() #lásd lentebb ugrás fizika
 
-        if keys[pygame.K_RIGHT] and self.rect.right<WIDTH: #jobbra
+        if keys[pygame.K_RIGHT] and self.rect.right<WIDTH-110: #jobbra
             self.x_movement(self.ninja_speed)
             self.ninja_forward=True
-        if keys[pygame.K_LEFT] and self.rect.left>0: #ballra
+        if keys[pygame.K_LEFT] and self.rect.left>130: #ballra
             self.x_movement(-self.ninja_speed)
             self.ninja_forward=False
 
         if keys[pygame.K_UP] and self.rect.bottom>HEIGHT-150: #fel
             self.y_movement(-self.ninja_speed)
-        if keys[pygame.K_DOWN] and HEIGHT-95>self.rect.bottom: #le
+            self.on_ground=True
+        if keys[pygame.K_DOWN] and HEIGHT-100>self.rect.bottom: #le
             self.y_movement(self.ninja_speed)
+            self.on_ground=True
 
         if not any(keys): #ha nincs lenyomott billentyű
             if self.ninja_forward: #álló helyzetben milyen kép legyen
@@ -80,20 +81,23 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
                 self.image=self.image_flipped
 
     #UGRÁS
+    def jump(self):
+        if self.on_ground:
+            self.on_ground=False #nem vagyunk a földön
+            self.dy=self.jump_speed  #minusszal kezd, a hozzáadás miatt átmegy pluszba, mint egy görbe
+        #self.apply_gravity() #ugrás után alkalmazd a gravitációt
+        
     def apply_gravity(self): #ugrásban a süllyedés
         if not self.on_ground:
             self.dy+=self.gravity
             self.rect.y+=self.dy  #gravitáció a négyzeten... majdnem (mindig ad hozzá)
-
-    def jump(self):
-        self.on_ground=False #nem vagyunk a földön
-        self.dy=self.jump_speed  #minusszal kezd, a hozzáadás miatt átmegy pluszba, mint egy görbe
+            self.y_movement_collision()
 
     def y_movement_collision(self): #ugrás utáni érkezés a platformra
-        if HEIGHT - 150 < self.rect.bottom < HEIGHT - 95:  # Ütközés vizsgálata a megfelelő magassági tartományban
+        if self.rect.bottom >= HEIGHT - 95:  # Ütközés vizsgálata az elfogadható tartománnyal
             self.rect.bottom = HEIGHT - 95  # A ninja alja az elfogadható tartomány alsó határánál helyezkedik el
-            self.dy = 0  # Zuhanás sebessége nulla
             self.on_ground = True  # Földön vagyunk
+            self.dy = 0  # Zuhanás sebessége nulla
 
     def x_movement(self,dx): #dx lesz a self.ninja_speed
         self.rect.x+=dx #horizontális mozgás
