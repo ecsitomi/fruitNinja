@@ -49,6 +49,8 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
         if keys[pygame.K_SPACE]: #támadás
             self.attack_mode=True
             self.attack_animation()
+        else:
+            self.attack_mode=False #ha nincs space nincs attack mód
 
         if keys[pygame.K_RIGHT] and self.rect.right<WIDTH: #jobbra
             self.x_movement(self.ninja_speed)
@@ -85,7 +87,7 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
 
     def attack_animation(self): #támadás animálásának indexei
         if self.ninja_index<len(self.ninja_fw)-1:
-            self.ninja_index+=0.1
+            self.ninja_index+=0.095
         else:
             self.ninja_index=0
         self.image=self.ninja_attack[int(self.ninja_index)]
@@ -123,21 +125,23 @@ class Fruit(pygame.sprite.Sprite):
         self.destroy()
 
 def collision_sprite(): #ütközések vizsgálata
-    if ninja.sprite.__getattribute__('attack_mode'): #getattribut előhozza a ninja attack módját vizsgálatra
-        if pygame.sprite.spritecollide(ninja.sprite,fruit_group,True): #attack módban ütközés, True azért, hogy a fruit meghal
-            return True #bool az egész def... értelmezd a chatgpt-n ha kell, gyakorlatilag igen-igeny>igen, igen-nem>nem
-        else:
-            return False
+    if ninja.sprite.attack_mode:
+        if pygame.sprite.spritecollide(ninja.sprite, fruit_group, True):
+            return True
+    return False
 
 def display_score(): #pontok megjelenítése
     score_surf=game_font.render('Score: '+str(score),True,FONT_COLOR) #hogyan
-    score_rect=score_surf.get_rect(topleft=(10,WIDTH-10)) #hol
+    score_rect=score_surf.get_rect(topleft=(WIDTH-200,10)) #hol
     screen.blit(score_surf,score_rect) #tadáám
 
 pygame.init() #inicializálja magát a pygame
 screen=pygame.display.set_mode((WIDTH,HEIGHT)) #meghatározza az ablakot
 pygame.display.set_caption('Fruit Ninja') #főcím
 clock=pygame.time.Clock() #időzítő
+
+platform_surf=pygame.image.load('img/platform_xxl.png') #platform képe
+platform_rect=platform_surf.get_rect(midtop=(WIDTH/2,HEIGHT-150)) #platform helye
 
 ninja=pygame.sprite.GroupSingle() #példányosítom a ninját
 ninja.add(Ninja())
@@ -160,6 +164,7 @@ while running:
 
 
     screen.fill(BG_COLOR) #háttérszín
+    screen.blit(platform_surf,platform_rect) #platform megjeleítése
 
     ninja.draw(screen) #ninja megjelenítése
     ninja.update() #frissítése
