@@ -121,6 +121,10 @@ class Fruit(pygame.sprite.Sprite):
         self.fruit_movement(self.fruit_speed) #gyümölcs sebességével esik
         self.destroy()
 
+def collision_sprite():
+    if ninja.sprite.__getattribute__('attack_mode'): #getattribut előhozza a ninja attack módját vizsgálatra
+        pygame.sprite.spritecollide(ninja.sprite,fruit_group,True) #attack módban ütközés, True azért, hogy a fruit meghal
+
 
 pygame.init() #inicializálja magát a pygame
 screen=pygame.display.set_mode((WIDTH,HEIGHT)) #meghatározza az ablakot
@@ -151,6 +155,8 @@ while running:
 
     fruit_group.draw(screen) #gyümölcsök megjelenítése
     fruit_group.update() #frissítése
+
+    collision_sprite() #ütközés
 
     pygame.display.update() #frissítés
     clock.tick(FPS) #másodpercenként mennyi kép
