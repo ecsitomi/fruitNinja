@@ -1,4 +1,5 @@
 import pygame
+import random
 #from pygame.sprite import _Group
 
 #állandó értékek
@@ -37,7 +38,7 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
         self.image=self.ninja_fw[self.ninja_index] #maga az adott kép
         self.rect=self.image.get_rect(midbottom=(WIDTH/2,HEIGHT-100)) #képernyő aljára lett rakva
 
-        self.speed=5 #mozgási sebesség
+        self.ninja_speed=5 #mozgási sebesség
         self.ninja_forward=True #melyik irányba megy
         self.attack_mode=False #támad-e?
 
@@ -49,16 +50,16 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
             self.attack_animation()
 
         if keys[pygame.K_RIGHT] and self.rect.right<WIDTH: #jobbra
-            self.x_movement(self.speed)
+            self.x_movement(self.ninja_speed)
             self.ninja_forward=True
         if keys[pygame.K_LEFT] and self.rect.left>0: #ballra
-            self.x_movement(-self.speed)
+            self.x_movement(-self.ninja_speed)
             self.ninja_forward=False
 
         if keys[pygame.K_UP] and self.rect.bottom>HEIGHT-140: #fel
-            self.y_movement(-self.speed)
+            self.y_movement(-self.ninja_speed)
         if keys[pygame.K_DOWN] and HEIGHT-60>self.rect.bottom: #le
-            self.y_movement(self.speed)
+            self.y_movement(self.ninja_speed)
 
         if not any(keys): #ha nincs lenyomott billentyű
             if self.ninja_forward: #álló helyzetben milyen kép legyen
@@ -66,7 +67,7 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
             else:
                 self.image=self.image_flipped
 
-    def x_movement(self,dx): #dx lesz a self.speed
+    def x_movement(self,dx): #dx lesz a self.ninja_speed
         self.rect.x+=dx #horizontális mozgás
         self.x_movement_animation()
 
@@ -88,11 +89,38 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
             self.ninja_index=0
         self.image=self.ninja_attack[int(self.ninja_index)]
 
-    def y_movement(self,dy): #dy az a self.speed
+    def y_movement(self,dy): #dy az a self.ninja_speed
         self.rect.y+=dy #vertikális mozgás
 
     def update(self):
         self.ninja_input() #objektumon belül történik az elem frissítése
+
+class Fruit(pygame.sprite.Sprite):
+    def __init__(self, fruit_type): #fruit type határozza meg mi fog leesni
+        super().__init__()
+
+        self.fruit_speed=5
+
+        if fruit_type=='pear': #körte
+            self.image=pygame.image.load('img/pear.png').convert_alpha() #körte kép
+        elif fruit_type=='banana': #banán
+            self.image=pygame.image.load('img/banana.png').convert_alpha() #banán kép
+        else: #eper
+            self.image=pygame.image.load('img/strawberry.png').convert_alpha() #eper kép
+
+        self.rect=self.image.get_rect(center=(random.randint(20,WIDTH-20),-20)) #honnan induljon le, képernyő fölött kezd, véletlen a horizonton
+
+    def fruit_movement(self,dy): #gyömölcs esésének metódusa
+        self.rect.y+=dy
+
+    def destroy(self):
+        if self.rect.top>HEIGHT:
+            self.kill() #törli magát ha a teteje több mint a képernyő magassága
+
+    def update(self): #gyümölcs magának a frissítése
+        self.fruit_movement(self.fruit_speed) #gyümölcs sebességével esik
+        self.destroy()
+
 
 pygame.init() #inicializálja magát a pygame
 screen=pygame.display.set_mode((WIDTH,HEIGHT)) #meghatározza az ablakot
