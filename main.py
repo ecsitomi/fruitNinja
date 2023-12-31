@@ -127,20 +127,32 @@ screen=pygame.display.set_mode((WIDTH,HEIGHT)) #meghatározza az ablakot
 pygame.display.set_caption('Fruit Ninja') #főcím
 clock=pygame.time.Clock() #időzítő
 
-ninja=pygame.sprite.GroupSingle() #példányosítom
+ninja=pygame.sprite.GroupSingle() #példányosítom a ninját
 ninja.add(Ninja())
+
+fruit_group=pygame.sprite.Group() #lehet sima group mert több objektumot tárol egyszerre
+fruit_timer=pygame.USEREVENT+1 #gyümölcsökhöz időzítő
+fruit_sec=1000 #időzítőhöz idő - 1 ms
+pygame.time.set_timer(fruit_timer,fruit_sec) #maga az időzítő elindul
 
 running=True #futás
 while running:
     for event in pygame.event.get(): #események
         if event.type==pygame.QUIT: #kilépés
             running=False
+        if event.type==fruit_timer:
+           fruit_group.add(Fruit(random.choice(['pear','banana','strawberry']))) 
+
 
     screen.fill(BG_COLOR) #háttérszín
+
     ninja.draw(screen) #ninja megjelenítése
-    ninja.update()
+    ninja.update() #frissítése
+
+    fruit_group.draw(screen) #gyümölcsök megjelenítése
+    fruit_group.update() #frissítése
 
     pygame.display.update() #frissítés
-    clock.tick(FPS)
+    clock.tick(FPS) #másodpercenként mennyi kép
 
 pygame.quit()
