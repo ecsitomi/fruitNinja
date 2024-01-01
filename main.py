@@ -60,19 +60,21 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
         if keys[pygame.K_SPACE] and self.on_ground: #space ugrik ha a földön van
             self.jump() #lásd lentebb ugrás fizika
 
-        if keys[pygame.K_RIGHT] and self.rect.right<WIDTH-110: #jobbra
+        if keys[pygame.K_RIGHT] and self.rect.right<WIDTH: #jobbra
             self.x_movement(self.ninja_speed)
             self.ninja_forward=True
-        if keys[pygame.K_LEFT] and self.rect.left>130: #ballra
+        if keys[pygame.K_LEFT] and self.rect.left>0: #ballra
             self.x_movement(-self.ninja_speed)
             self.ninja_forward=False
 
+        ''' nem szükséges a fel-le mozgás
         if keys[pygame.K_UP] and self.rect.bottom>HEIGHT-150: #fel
             self.y_movement(-self.ninja_speed)
             self.on_ground=True
         if keys[pygame.K_DOWN] and HEIGHT-100>self.rect.bottom: #le
             self.y_movement(self.ninja_speed)
             self.on_ground=True
+        '''
 
         if not any(keys): #ha nincs lenyomott billentyű
             if self.ninja_forward: #álló helyzetben milyen kép legyen
@@ -94,10 +96,11 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
             self.y_movement_collision()
 
     def y_movement_collision(self): #ugrás utáni érkezés a platformra
-        if self.rect.bottom >= HEIGHT - 95:  # Ütközés vizsgálata az elfogadható tartománnyal
-            self.rect.bottom = HEIGHT - 95  # A ninja alja az elfogadható tartomány alsó határánál helyezkedik el
-            self.on_ground = True  # Földön vagyunk
-            self.dy = 0  # Zuhanás sebessége nulla
+        for pf_rect in platform_rects:
+            if self.rect.colliderect(pf_rect):  # Ütközés vizsgálata az elfogadható tartománnyal
+                self.rect.bottom = pf_rect.top  # A ninja alja az elfogadható tartomány alsó határánál helyezkedik el
+                self.on_ground = True  # Földön vagyunk
+                self.dy = 0  # Zuhanás sebessége nulla
 
     def x_movement(self,dx): #dx lesz a self.ninja_speed
         self.rect.x+=dx #horizontális mozgás
@@ -171,8 +174,10 @@ screen=pygame.display.set_mode((WIDTH,HEIGHT)) #meghatározza az ablakot
 pygame.display.set_caption('Fruit Ninja') #főcím
 clock=pygame.time.Clock() #időzítő
 
-platform_surf=pygame.image.load('img/platform_xxl.png') #platform képe
-platform_rect=platform_surf.get_rect(midtop=(WIDTH/2,HEIGHT-160)) #platform helye
+platform_surf=pygame.image.load('img/platform.png').convert_alpha() #platform képe
+platform_rects=[platform_surf.get_rect(midtop=(WIDTH/2,HEIGHT-160)),
+                platform_surf.get_rect(midtop=(WIDTH+250,HEIGHT-200)),
+                platform_surf.get_rect(midtop=(-250,HEIGHT-230))] #platform helyei
 
 ninja=pygame.sprite.GroupSingle() #példányosítom a ninját
 ninja.add(Ninja())
@@ -195,7 +200,8 @@ while running:
 
 
     screen.fill(BG_COLOR) #háttérszín
-    screen.blit(platform_surf,platform_rect) #platform megjeleítése
+    for platform_rect in platform_rects:
+        screen.blit(platform_surf,platform_rect) #platform megjeleítése
 
     ninja.draw(screen) #ninja megjelenítése
     ninja.update() #frissítése
