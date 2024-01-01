@@ -223,7 +223,9 @@ while running:
 
     ninja.draw(screen) #ninja megjelenítése
     ninja.update() #frissítése
-    pygame.draw.rect(screen,'gray',ninja.sprite.rect,2) #kirajzolja a ninja rect vonalát
+    
+    #ELLENŐRZÉSHEZ KELLHET
+    #pygame.draw.rect(screen,'gray',ninja.sprite.rect,2) #kirajzolja a ninja rect vonalát
 
     fruit_group.draw(screen) #gyümölcsök megjelenítése
     fruit_group.update() #frissítése
