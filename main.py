@@ -78,11 +78,11 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
 
         if not any(keys): #ha nincs lenyomott billentyű
             if self.ninja_forward: #álló helyzetben milyen kép legyen
-                self.image=self.image_original
+                self.image=self.image_original #álló kép jobbra néz
             else:
-                self.image=self.image_flipped
-            recr_center=self.rect.center
-            self.rect=self.image.get_rect(center=recr_center)
+                self.image=self.image_flipped #állókép balra néz
+            rect_center=self.rect.center #lekérjük a rect adatait, mert álva kisebb
+            self.rect=self.image.get_rect(center=rect_center) #és felülírjuk a mozgós rect adatokat, mert így kisebb
 
     #UGRÁS
     def jump(self):
