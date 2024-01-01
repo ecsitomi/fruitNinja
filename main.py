@@ -8,6 +8,11 @@ BG_COLOR=(255,255,255)
 FONT_COLOR=(27,131,142)
 FPS=60
 
+#háttérkép beállítása
+background = pygame.image.load('img/background.jpg')
+background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+background.set_alpha(200) #háttér legyen halványabb
+
 class Ninja(pygame.sprite.Sprite): #ninja osztály
     def __init__(self):
         super().__init__()
@@ -24,13 +29,22 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
         NINJA_BW_3=pygame.image.load('img/Run__005_b.png').convert_alpha()
         self.ninja_bw=[NINJA_BW_1,NINJA_BW_2,NINJA_BW_3]
 
-        #támadások animálása
+        #támadások animálása jobbra
         NINJA_ATTACK_1=pygame.image.load('img/Jump_Attack__002.png').convert_alpha()
-        NINJA_ATTACK_2=pygame.image.load('img/Jump_Attack__009.png').convert_alpha()
-        NINJA_ATTACK_3=pygame.image.load('img/Jump_Attack__007.png').convert_alpha()
-        self.ninja_attack=[NINJA_ATTACK_1,NINJA_ATTACK_2,NINJA_ATTACK_3]
+        NINJA_ATTACK_2=pygame.image.load('img/Attack__009.png').convert_alpha()
+        NINJA_ATTACK_3=pygame.image.load('img/Attack__009.png').convert_alpha()
+        NINJA_ATTACK_4=pygame.image.load('img/Jump_Attack__007.png').convert_alpha()
+        self.ninja_attack_fw=[NINJA_ATTACK_1,NINJA_ATTACK_2,NINJA_ATTACK_3,NINJA_ATTACK_4]
+
+        #támadás balra
+        NINJA_ATTACK_1b=pygame.transform.flip(NINJA_ATTACK_1,True,False)
+        NINJA_ATTACK_2b=pygame.transform.flip(NINJA_ATTACK_2,True,False)
+        NINJA_ATTACK_3b=pygame.transform.flip(NINJA_ATTACK_3,True,False)
+        NINJA_ATTACK_4b=pygame.transform.flip(NINJA_ATTACK_4,True,False)
+        self.ninja_attack_bw=[NINJA_ATTACK_1b,NINJA_ATTACK_2b,NINJA_ATTACK_3b,NINJA_ATTACK_4b]
 
         self.ninja_index=0 #melyik kép a listából
+        self.ninja_attack=self.ninja_attack_fw
 
         self.image_original=pygame.image.load('img/Idle__000 1.png').convert_alpha() #jobbra néző állókép
         self.image_flipped=pygame.transform.flip(self.image_original,True,False) #balra néző állókép
@@ -84,6 +98,17 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
             rect_center=self.rect.center #lekérjük a rect adatait, mert álva kisebb
             self.rect=self.image.get_rect(center=rect_center) #és felülírjuk a mozgós rect adatokat, mert így kisebb
 
+    def attack_animation(self): #támadás animálásának indexei
+        if self.ninja_index<len(self.ninja_fw)-1:
+            self.ninja_index+=0.1
+        else:
+            self.ninja_index=0
+
+        if self.ninja_forward: #jobbra kardozás
+            self.image=self.ninja_attack_fw[int(self.ninja_index)]
+        else: #balrakardozás
+            self.image = self.ninja_attack_bw[int(self.ninja_index)]
+
     #UGRÁS
     def jump(self):
         self.on_ground=False #nem vagyunk a földön
@@ -115,12 +140,6 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
         else:
             self.image=self.ninja_bw[int(self.ninja_index)] #ez a balra mozgás
 
-    def attack_animation(self): #támadás animálásának indexei
-        if self.ninja_index<len(self.ninja_fw)-1:
-            self.ninja_index+=0.095
-        else:
-            self.ninja_index=0
-        self.image=self.ninja_attack[int(self.ninja_index)]
 
     def y_movement(self,dy): #dy az a self.ninja_speed
         self.rect.y+=dy #vertikális mozgás
@@ -157,8 +176,8 @@ class Fruit(pygame.sprite.Sprite):
         self.destroy()
 
 def collision_sprite(): #ütközések vizsgálata
-    if ninja.sprite.attack_mode:
-        if pygame.sprite.spritecollide(ninja.sprite, fruit_group, True):
+    if ninja.sprite.attack_mode: #ha ninja támad
+        if pygame.sprite.spritecollide(ninja.sprite, fruit_group, True): #és ha találkozik egy gyümölcsel
             return True
     return False
 
@@ -198,6 +217,7 @@ while running:
 
 
     screen.fill(BG_COLOR) #háttérszín
+    screen.blit(background, (0, 0))  # Háttérkép kirajzolása a képernyőre
     for platform_rect in platform_rects:
         screen.blit(platform_surf,platform_rect) #platform megjeleítése
 
