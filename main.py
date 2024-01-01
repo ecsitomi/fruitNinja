@@ -236,3 +236,4 @@ while running:
     clock.tick(FPS) #másodpercenként mennyi kép
 
 pygame.quit()
+
