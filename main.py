@@ -81,26 +81,24 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
                 self.image=self.image_original
             else:
                 self.image=self.image_flipped
+            recr_center=self.rect.center
+            self.rect=self.image.get_rect(center=recr_center)
 
     #UGRÁS
     def jump(self):
-        if self.on_ground:
-            self.on_ground=False #nem vagyunk a földön
-            self.dy=self.jump_speed  #minusszal kezd, a hozzáadás miatt átmegy pluszba, mint egy görbe
-        #self.apply_gravity() #ugrás után alkalmazd a gravitációt
+        self.on_ground=False #nem vagyunk a földön
+        self.dy=self.jump_speed  #minusszal kezd, a hozzáadás miatt átmegy pluszba, mint egy görbe
         
     def apply_gravity(self): #ugrásban a süllyedés
-        if not self.on_ground:
-            self.dy+=self.gravity
-            self.rect.y+=self.dy  #gravitáció a négyzeten... majdnem (mindig ad hozzá)
-            self.y_movement_collision()
+        self.dy+=self.gravity
+        self.rect.y+=self.dy  #gravitáció a négyzeten... majdnem (mindig ad hozzá)
 
     def y_movement_collision(self): #ugrás utáni érkezés a platformra
-        for pf_rect in platform_rects:
-            if self.rect.colliderect(pf_rect):  # Ütközés vizsgálata az elfogadható tartománnyal
+        for pf_rect in platform_rects: #azért for mert több platform van
+            if self.rect.colliderect(pf_rect):  # Ütközés vizsgálata a platformmal
                 self.rect.bottom = pf_rect.top  # A ninja alja az elfogadható tartomány alsó határánál helyezkedik el
-                self.on_ground = True  # Földön vagyunk
                 self.dy = 0  # Zuhanás sebessége nulla
+                self.on_ground = True  # Földön vagyunk
 
     def x_movement(self,dx): #dx lesz a self.ninja_speed
         self.rect.x+=dx #horizontális mozgás
@@ -205,6 +203,7 @@ while running:
 
     ninja.draw(screen) #ninja megjelenítése
     ninja.update() #frissítése
+    pygame.draw.rect(screen,'gray',ninja.sprite.rect,2) #kirajzolja a ninja rect vonalát
 
     fruit_group.draw(screen) #gyümölcsök megjelenítése
     fruit_group.update() #frissítése
