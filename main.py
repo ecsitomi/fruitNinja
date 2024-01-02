@@ -239,3 +239,10 @@ while running:
 
 pygame.quit()
 
+#exportálás .exe fájlába
+#pyinstaller main.py --onefile --windowed
+
+#feladatok amiket meg kell csinálni
+#kezdő-záró képernyő
+#életerő, halál
+
