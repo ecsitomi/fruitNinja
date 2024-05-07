@@ -52,14 +52,14 @@ class Ninja(pygame.sprite.Sprite): #ninja osztály
         self.image=self.ninja_fw[self.ninja_index] #maga az adott kép
         self.rect=self.image.get_rect(midbottom=(WIDTH/2,HEIGHT-100)) #képernyő aljára lett rakva
 
-        self.ninja_speed=5 #mozgási sebesség
+        self.ninja_speed=8 #mozgási sebesség
         self.ninja_forward=True #melyik irányba megy
         self.attack_mode=False #támad-e?
         
         #UGRÁS ELEMEI
         self.on_ground=True
         self.gravity=1
-        self.jump_speed=-15
+        self.jump_speed=-18
         self.dy=0
 
     def ninja_input(self):
